@@ -1,36 +1,23 @@
 import _ from 'lodash';
 import * as d3 from "d3";
+const simpleSlider = require('d3-simple-slider').sliderHorizontal;
+require('expose-loader?d3!d3');
 
-function component() {
-    var element = document.createElement('p');
-  	return element;
-}
+d3.sliderHorizontal = simpleSlider;
 
-function circle(){
-	var circle = document.createElement('circle')
-	return circle
-}
-
-// // Update…
-// var p = d3.select("body")
-//   .selectAll("p")
-//   .data([4, 8, 15, 16, 23, 42])
-//     .text(function(d) { return d; });
-
-// // Enter…
-// p.enter().append("p")
-//     .text(function(d) { return d + 1; });
-
-// // Exit…
-// p.exit().remove();
-
-document.body.appendChild(component());
 d3.select('body')
-	.append('svg')
-		.style('width', 800)
-		.style('height', 800)
+	.append('div')
+	.style('margin-top', '100px')
+	.attr('id', 'contain')
 
-d3.select('svg').append('circle')
+d3.select('#contain')
+	.append('svg')
+		.style('width', window.innerWidth)
+		.style('height', window.innerHeight - 110)
+
+d3.select('#contain svg').append('circle')
+	.attr('fill', 'transparent')
+
 
 function getRandomColor() {
   var letters = '0123456789ABCDEF';
@@ -48,52 +35,53 @@ function addCircles(num){
 	}
 	//console.log(list)
 	//var e = [4,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26]
-	var c = d3.selectAll('svg')
+	var c = d3.selectAll('#contain svg')
 			.selectAll('circle')
 			.data(RandomList)
-			  .attr('r', function(d){ return d*.25})
-			  .attr('cx', 800)
-			  .attr('cy', 800)
-			  .attr('fill', 'red')
 	
 	c.enter().append('circle')
 		.attr('r', function(d){ return d*.25})
-		.attr('cx', function(d){ return 400})
-		.attr('cy', function(d){ return d * 15})
+		.attr('cx', function(d){ return window.innerWidth/2})
+		.attr('cy', function(d){ return d * 25})
 		.attr('fill', function(d){return getRandomColor()})
 	c.exit().remove();
+ 	d3.selectAll("circle").transition()
+     	.duration(2000)
+     	.delay(function(d, i) { return i * 10; })
+     	.attr("r", function(d) { return Math.sqrt(d * 1000)});
 };
 
 
 
-addCircles(1000)
+//addCircles(1000)
 
-//setTimeout(function(){addCircles(100)}, 10000)
+function changeNum(e){
+	var c = d3.select('svg')
+		.selectAll('circle')
+		.remove();
+	d3.select('svg').append('circle');
+	addCircles(e);
+}
 
 
 
- d3.selectAll("circle").transition()
-     .duration(2000)
-     .delay(function(d, i) { return i * 10; })
-     .attr("r", function(d) { return Math.sqrt(d * 1000)});
+// setTimeout(function(){
+//  setInterval(
+//  	function(){
+//  		 d3.selectAll("circle").transition()
+//  		.duration(1000)
+//  		.delay(function(d, i) {return i * 25})
+//  		.attr('cx', function(d){return d })
+//  	}, 1000)
 
-setTimeout(function(){
- setInterval(
- 	function(){
- 		 d3.selectAll("circle").transition()
- 		.duration(1000)
- 		.delay(function(d, i) {return i * 25})
- 		.attr('cx', function(d){return d })
- 	}, 1000)
-
-setInterval(
-	function(){
-		 d3.selectAll("circle").transition()
-		.duration(1000)
-		.delay(function(d, i) {return i * 25})
-		.attr('cx', function(d){return (d * 25)})
-	}, 2000)
-},10000)
+// setInterval(
+// 	function(){
+// 		 d3.selectAll("circle").transition()
+// 		.duration(1000)
+// 		.delay(function(d, i) {return i * 25})
+// 		.attr('cx', function(d){return (d * 25)})
+// 	}, 2000)
+// },10000)
 
 
 setTimeout(function(){
@@ -101,4 +89,32 @@ setTimeout(function(){
 		.style("background-color", '#d3d3d3')
 }, 200)
 
+d3.select('body')
+	.append('p')
+	.attr('id', 'value')
+d3.select('body')
+	.append('div')
+	.attr('id', 'slider')
+	.style('position', 'absolute')
+	.style('top', '5px')
+	.style('left', '50%')
+	.style('transform', 'translate(-35%)')
+
+ var slider = d3.sliderHorizontal()
+    .min(0)
+    .max(1000)
+    .step(1)
+    .width(300)
+    .displayValue(false)
+    .on('onchange', val => {
+      //d3.select("#value").text(val);
+      addCircles(val)
+    });
+
+  d3.select("#slider").append("svg")
+    .attr("width", 500)
+    .attr("height", 100)
+    .append("g")
+    .attr("transform", "translate(30,30)")
+    .call(slider)
 
